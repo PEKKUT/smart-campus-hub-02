@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Plus, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DialogTrigger } from '@/components/ui/dialog';
+import { Dialog } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import TransaksiSummaryCards from './TransaksiSummaryCards';
 import TransaksiForm from './TransaksiForm';
@@ -104,12 +104,12 @@ const TransaksiKeuangan = () => {
             <DollarSign className="h-5 w-5" />
             Riwayat Transaksi
           </CardTitle>
-          <DialogTrigger asChild>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <Button onClick={() => setIsDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Tambah Transaksi
             </Button>
-          </DialogTrigger>
+          </Dialog>
         </CardHeader>
         <CardContent>
           <TransaksiTable
@@ -121,15 +121,17 @@ const TransaksiKeuangan = () => {
         </CardContent>
       </Card>
 
-      <TransaksiForm
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        editingTransaksi={editingTransaksi}
-        formData={formData}
-        setFormData={setFormData}
-        onSubmit={handleSubmit}
-        kategoriOptions={kategoriOptions}
-      />
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <TransaksiForm
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          editingTransaksi={editingTransaksi}
+          formData={formData}
+          setFormData={setFormData}
+          onSubmit={handleSubmit}
+          kategoriOptions={kategoriOptions}
+        />
+      </Dialog>
     </div>
   );
 };
