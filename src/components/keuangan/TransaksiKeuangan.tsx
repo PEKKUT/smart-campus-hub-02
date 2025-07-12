@@ -57,7 +57,18 @@ const TransaksiKeuangan = () => {
         .order('tanggal', { ascending: false });
 
       if (error) throw error;
-      setTransaksi(data || []);
+      
+      // Type-safe mapping to ensure tipe is properly typed
+      const typedTransaksi: Transaksi[] = (data || []).map(item => ({
+        id: item.id,
+        tanggal: item.tanggal,
+        kategori: item.kategori,
+        deskripsi: item.deskripsi,
+        nominal: item.nominal,
+        tipe: item.tipe as 'masuk' | 'keluar'
+      }));
+      
+      setTransaksi(typedTransaksi);
     } catch (error) {
       console.error('Error fetching transaksi:', error);
       toast({
