@@ -6,13 +6,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import LoginForm from "./components/LoginForm";
+import LandingPage from "./components/LandingPage";
 import Dashboard from "./components/Dashboard";
 import NotFound from "./pages/NotFound";
+import { useState } from "react";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const { user, loading } = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
 
   if (loading) {
     return (
@@ -25,10 +28,30 @@ const AppContent = () => {
     );
   }
 
+  if (user) {
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    );
+  }
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={user ? <Dashboard /> : <LoginForm />} />
+        <Route 
+          path="/" 
+          element={
+            showLogin ? (
+              <LoginForm onBackToLanding={() => setShowLogin(false)} />
+            ) : (
+              <LandingPage onLoginClick={() => setShowLogin(true)} />
+            )
+          } 
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

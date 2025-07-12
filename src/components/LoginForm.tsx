@@ -4,10 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-const LoginForm = () => {
+interface LoginFormProps {
+  onBackToLanding: () => void;
+}
+
+const LoginForm = ({ onBackToLanding }: LoginFormProps) => {
   const [nama, setNama] = useState('');
   const [nim, setNim] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,8 +40,19 @@ const LoginForm = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center">
+          <div className="flex items-center justify-between mb-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onBackToLanding}
+              className="p-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex-1" />
+          </div>
           <CardTitle className="text-2xl font-bold text-gray-800">
-            Sistem Manajemen Perkuliahan
+            Smart Campus
           </CardTitle>
           <CardDescription>
             Masukkan nama dan NIM untuk masuk

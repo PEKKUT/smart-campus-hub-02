@@ -85,7 +85,7 @@ const ChatbotTab = () => {
     setLoading(true);
 
     try {
-      // Simulate AI response (replace with actual OpenAI API call)
+      // Generate AI response
       const botResponse = generateBotResponse(inputText);
       
       const botMessage: Message = {
@@ -115,19 +115,22 @@ const ChatbotTab = () => {
   };
 
   const generateBotResponse = (message: string): string => {
-    // Simple chatbot responses (replace with actual OpenAI integration)
     const lowerMessage = message.toLowerCase();
     
     if (lowerMessage.includes('jadwal')) {
       return 'Untuk mengelola jadwal kuliah, Anda bisa menggunakan menu Pengelola Kuliah > Jadwal & Kehadiran. Di sana Anda bisa menambah, edit, dan melihat jadwal kuliah Anda.';
     } else if (lowerMessage.includes('nilai')) {
       return 'Untuk melihat dan mengelola nilai, silakan buka menu Pengelola Kuliah > Nilai. Anda bisa input nilai tugas, UTS, UAS, dan sistem akan menghitung IPK secara otomatis.';
-    } else if (lowerMessage.includes('keuangan')) {
-      return 'Fitur Pengelola Keuangan membantu Anda mencatat transaksi harian dan melihat statistik keuangan. Anda bisa input pemasukan dan pengeluaran dengan berbagai kategori.';
-    } else if (lowerMessage.includes('halo') || lowerMessage.includes('hai')) {
-      return `Halo ${user?.nama}! Saya adalah asisten AI yang siap membantu Anda dengan pertanyaan seputar sistem manajemen perkuliahan. Ada yang bisa saya bantu?`;
+    } else if (lowerMessage.includes('keuangan') || lowerMessage.includes('uang') || lowerMessage.includes('rupiah')) {
+      return 'Fitur Pengelola Keuangan membantu Anda mencatat transaksi harian dalam rupiah dan melihat statistik keuangan. Anda bisa input pemasukan dan pengeluaran dengan berbagai kategori seperti makanan, transport, buku, dll.';
+    } else if (lowerMessage.includes('halo') || lowerMessage.includes('hai') || lowerMessage.includes('hello')) {
+      return `Halo ${user?.nama}! Saya adalah asisten AI Smart Campus yang siap membantu Anda dengan pertanyaan seputar sistem manajemen perkuliahan. Ada yang bisa saya bantu?`;
+    } else if (lowerMessage.includes('bantuan') || lowerMessage.includes('help')) {
+      return 'Saya bisa membantu Anda dengan:\n- Informasi tentang jadwal kuliah\n- Pengelolaan nilai dan IPK\n- Pengelolaan keuangan dalam rupiah\n- Fitur-fitur Smart Campus lainnya\n\nSilakan tanya apa yang ingin Anda ketahui!';
+    } else if (lowerMessage.includes('smart campus')) {
+      return 'Smart Campus adalah sistem informasi akademik berbasis web dengan chatbot AI. Sistem ini membantu mahasiswa mengelola jadwal kuliah, nilai, keuangan dalam rupiah, dan berbagai kebutuhan akademik lainnya dengan mudah dan efisien.';
     } else {
-      return 'Terima kasih atas pertanyaan Anda. Saya adalah asisten AI untuk sistem manajemen perkuliahan. Saya bisa membantu Anda dengan informasi tentang jadwal, nilai, kehadiran, dan keuangan. Ada yang spesifik yang ingin Anda tanyakan?';
+      return 'Terima kasih atas pertanyaan Anda! Saya adalah asisten AI Smart Campus yang siap membantu dengan informasi tentang jadwal, nilai, kehadiran, dan keuangan dalam rupiah. Ada yang spesifik yang ingin Anda tanyakan?';
     }
   };
 
@@ -142,7 +145,7 @@ const ChatbotTab = () => {
     <div className="p-6 h-full flex flex-col">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800">AI Chatbot</h1>
-        <p className="text-gray-600">Tanyakan apa saja kepada asisten AI Anda</p>
+        <p className="text-gray-600">Tanyakan apa saja kepada asisten AI Smart Campus</p>
       </div>
 
       <Card className="flex-1 flex flex-col">
@@ -159,6 +162,7 @@ const ChatbotTab = () => {
                 <div className="text-center text-gray-500 py-8">
                   <Bot className="w-12 h-12 mx-auto mb-2 text-gray-400" />
                   <p>Mulai percakapan dengan mengetik pesan di bawah</p>
+                  <p className="text-sm mt-2">Tanya tentang jadwal, nilai, keuangan, atau fitur Smart Campus lainnya!</p>
                 </div>
               )}
               
@@ -180,7 +184,7 @@ const ChatbotTab = () => {
                       ) : (
                         <User className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       )}
-                      <p className="text-sm">{message.text}</p>
+                      <p className="text-sm whitespace-pre-line">{message.text}</p>
                     </div>
                   </div>
                 </div>
