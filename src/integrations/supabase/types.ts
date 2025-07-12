@@ -14,7 +14,255 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chat_history: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          response: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          response: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          response?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jadwal_kuliah: {
+        Row: {
+          created_at: string
+          dosen: string | null
+          hari: string
+          id: string
+          jam_mulai: string
+          jam_selesai: string
+          mata_kuliah: string
+          ruangan: string | null
+          sks: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dosen?: string | null
+          hari: string
+          id?: string
+          jam_mulai: string
+          jam_selesai: string
+          mata_kuliah: string
+          ruangan?: string | null
+          sks?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dosen?: string | null
+          hari?: string
+          id?: string
+          jam_mulai?: string
+          jam_selesai?: string
+          mata_kuliah?: string
+          ruangan?: string | null
+          sks?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jadwal_kuliah_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kehadiran: {
+        Row: {
+          created_at: string
+          id: string
+          jadwal_id: string
+          status: string
+          tanggal: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jadwal_id: string
+          status: string
+          tanggal: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jadwal_id?: string
+          status?: string
+          tanggal?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kehadiran_jadwal_id_fkey"
+            columns: ["jadwal_id"]
+            isOneToOne: false
+            referencedRelation: "jadwal_kuliah"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kehadiran_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nilai: {
+        Row: {
+          created_at: string
+          grade: string | null
+          id: string
+          jadwal_id: string
+          nilai_akhir: number | null
+          semester: number
+          tugas: number | null
+          uas: number | null
+          user_id: string
+          uts: number | null
+        }
+        Insert: {
+          created_at?: string
+          grade?: string | null
+          id?: string
+          jadwal_id: string
+          nilai_akhir?: number | null
+          semester: number
+          tugas?: number | null
+          uas?: number | null
+          user_id: string
+          uts?: number | null
+        }
+        Update: {
+          created_at?: string
+          grade?: string | null
+          id?: string
+          jadwal_id?: string
+          nilai_akhir?: number | null
+          semester?: number
+          tugas?: number | null
+          uas?: number | null
+          user_id?: string
+          uts?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nilai_jadwal_id_fkey"
+            columns: ["jadwal_id"]
+            isOneToOne: false
+            referencedRelation: "jadwal_kuliah"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nilai_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transaksi: {
+        Row: {
+          created_at: string
+          deskripsi: string
+          id: string
+          kategori: string
+          nominal: number
+          tanggal: string
+          tipe: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deskripsi: string
+          id?: string
+          kategori: string
+          nominal: number
+          tanggal: string
+          tipe: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deskripsi?: string
+          id?: string
+          kategori?: string
+          nominal?: number
+          tanggal?: string
+          tipe?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaksi_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string
+          id: string
+          nama: string
+          nim: string
+          prodi: string | null
+          role: string | null
+          semester: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nama: string
+          nim: string
+          prodi?: string | null
+          role?: string | null
+          semester?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nama?: string
+          nim?: string
+          prodi?: string | null
+          role?: string | null
+          semester?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
