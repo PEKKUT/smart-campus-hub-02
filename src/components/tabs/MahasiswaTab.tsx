@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const MahasiswaTab = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [formData, setFormData] = useState({
     nama: '',
     nim: '',
@@ -62,13 +62,10 @@ const MahasiswaTab = () => {
 
       toast.success('Data berhasil diperbarui!');
       
-      // Update local storage
-      const updatedUser = {
-        ...user,
-        prodi: formData.prodi,
-        semester: parseInt(formData.semester) || null
-      };
-      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      // Refresh user data in context to sync across all components
+      if (refreshUser) {
+        await refreshUser();
+      }
       
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -79,17 +76,25 @@ const MahasiswaTab = () => {
   };
 
   return (
-    <div className="p-6 max-w-2xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Informasi Mahasiswa</h1>
-        <p className="text-gray-600">Kelola data pribadi Anda</p>
+    <div className="p-4 sm:p-6 max-w-2xl">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Informasi Mahasiswa</h1>
+        <p className="text-sm sm:text-base text-gray-600">
+          Kelola data pribadi Anda
+          {user?.prodi && user?.semester && (
+            <span className="block mt-1 text-blue-600 font-medium">
+              {user.prodi} - Semester {user.semester}
+            </span>
+          )}
+        </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Data Mahasiswa</CardTitle>
           <CardDescription>
-            Nama dan NIM tidak dapat diubah. Anda dapat mengatur prodi dan semester.
+            Nama dan NIM tidak dapat diubah. Setelah mengatur prodi dan semester, 
+            informasi akan otomatis tersinkronisasi ke seluruh aplikasi.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -153,12 +158,32 @@ const MahasiswaTab = () => {
               </Select>
             </div>
 
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full sm:w-auto">
               {loading ? 'Menyimpan...' : 'Simpan Perubahan'}
             </Button>
           </form>
         </CardContent>
       </Card>
+
+      {user?.prodi && user?.semester && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="text-lg">Informasi Akademik</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="text-sm text-gray-600">Program Studi</div>
+                <div className="text-lg font-semibold text-blue-700">{user.prodi}</div>
+              </div>
+              <div className="p-4 bg-green-50 rounded-lg">
+                <div className="text-sm text-gray-600">Semester Aktif</div>
+                <div className="text-lg font-semibold text-green-700">Semester {user.semester}</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

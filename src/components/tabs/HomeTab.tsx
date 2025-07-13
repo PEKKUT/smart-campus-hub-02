@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { GraduationCap, TrendingUp, Calendar, BookOpen } from 'lucide-react';
+import { GraduationCap, TrendingUp, Calendar, BookOpen, User, Award } from 'lucide-react';
 
 const HomeTab = () => {
   const { user } = useAuth();
@@ -66,16 +66,38 @@ const HomeTab = () => {
       });
 
       // Prepare chart data
-      const sksPerSemester = [
-        { semester: 1, sks: totalSKS }
-      ];
+      const semesterMap = new Map();
+      nilaiData?.forEach(item => {
+        const semester = item.semester;
+        if (!semesterMap.has(semester)) {
+          semesterMap.set(semester, { sks: 0, count: 0 });
+        }
+        const current = semesterMap.get(semester);
+        current.count += 1;
+      });
 
-      const ipkTrend = [
-        { semester: 1, ipk: avgNilai }
-      ];
+      jadwalData?.forEach(item => {
+        // Assume semester based on user's current semester for demo
+        const semester = user.semester || 1;
+        if (!semesterMap.has(semester)) {
+          semesterMap.set(semester, { sks: 0, count: 0 });
+        }
+        const current = semesterMap.get(semester);
+        current.sks += item.sks || 0;
+      });
 
-      const kehadiranChart = jadwalData?.map(jadwal => ({
-        mataKuliah: jadwal.mata_kuliah,
+      const sksPerSemester = Array.from(semesterMap.entries()).map(([semester, data]) => ({
+        semester: `Sem ${semester}`,
+        sks: data.sks
+      })).sort((a, b) => parseInt(a.semester.split(' ')[1]) - parseInt(b.semester.split(' ')[1]));
+
+      const ipkTrend = Array.from(semesterMap.entries()).map(([semester, data]) => ({
+        semester: `Sem ${semester}`,
+        ipk: avgNilai // Simplified for demo
+      }));
+
+      const kehadiranChart = jadwalData?.slice(0, 5).map(jadwal => ({
+        mataKuliah: jadwal.mata_kuliah.substring(0, 10) + '...',
         persentase: Math.random() * 100 // Placeholder
       })) || [];
 
@@ -97,9 +119,48 @@ const HomeTab = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Dashboard</h1>
-          <p className="text-sm sm:text-base text-gray-600">Selamat datang, {user?.nama}</p>
+          <p className="text-sm sm:text-base text-gray-600">
+            Selamat datang, {user?.nama}
+            {user?.prodi && user?.semester && (
+              <span className="block sm:inline sm:ml-2 text-blue-600 font-medium">
+                {user.prodi} - Semester {user.semester}
+              </span>
+            )}
+          </p>
         </div>
       </div>
+
+      {/* User Profile Card */}
+      {user?.prodi && user?.semester && (
+        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-800">
+              <User className="w-5 h-5" />
+              Profil Akademik
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-sm text-gray-600">NIM</div>
+                <div className="font-semibold text-blue-700">{user.nim}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm text-gray-600">Program Studi</div>
+                <div className="font-semibold text-blue-700">{user.prodi}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm text-gray-600">Semester</div>
+                <div className="font-semibold text-blue-700">{user.semester}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm text-gray-600">Status</div>
+                <div className="font-semibold text-green-600">Aktif</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
@@ -110,16 +171,24 @@ const HomeTab = () => {
           </CardHeader>
           <CardContent>
             <div className="text-lg sm:text-2xl font-bold">{stats.totalSKS}</div>
+            {user?.semester && (
+              <p className="text-xs text-muted-foreground">
+                Semester {user.semester}
+              </p>
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-xs sm:text-sm font-medium">IPK</CardTitle>
-            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
+            <Award className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-lg sm:text-2xl font-bold">{stats.ipk.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.ipk >= 3.5 ? 'Sangat Baik' : stats.ipk >= 3.0 ? 'Baik' : 'Perlu Ditingkatkan'}
+            </p>
           </CardContent>
         </Card>
 
@@ -130,6 +199,9 @@ const HomeTab = () => {
           </CardHeader>
           <CardContent>
             <div className="text-lg sm:text-2xl font-bold">{stats.kehadiran.toFixed(1)}%</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.kehadiran >= 80 ? 'Baik' : 'Perlu Ditingkatkan'}
+            </p>
           </CardContent>
         </Card>
 
@@ -140,6 +212,9 @@ const HomeTab = () => {
           </CardHeader>
           <CardContent>
             <div className="text-lg sm:text-2xl font-bold">{stats.mataKuliah}</div>
+            <p className="text-xs text-muted-foreground">
+              Semester ini
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -184,8 +259,15 @@ const HomeTab = () => {
       {stats.totalSKS === 0 && (
         <Card>
           <CardContent className="text-center py-6 sm:py-8">
-            <p className="text-sm sm:text-base text-gray-500">
-              Belum ada data. Mulai dengan menambahkan mata kuliah di menu Pengelola Kuliah.
+            <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p className="text-sm sm:text-base text-gray-500 mb-2">
+              Belum ada data akademik.
+            </p>
+            <p className="text-xs sm:text-sm text-gray-400">
+              {!user?.prodi || !user?.semester 
+                ? 'Lengkapi profil Anda di menu Info Mahasiswa terlebih dahulu, kemudian mulai dengan menambahkan mata kuliah di menu Pengelola Kuliah.'
+                : 'Mulai dengan menambahkan mata kuliah di menu Pengelola Kuliah.'
+              }
             </p>
           </CardContent>
         </Card>

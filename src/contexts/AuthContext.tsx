@@ -1,15 +1,21 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Tables } from '@/integrations/supabase/types';
 
-type User = Tables<'users'>;
+interface User {
+  id: string;
+  nama: string;
+  nim: string;
+  prodi?: string;
+  semester?: number;
+  role?: string;
+}
 
 interface AuthContextType {
   user: User | null;
-  login: (nama: string, nim: string) => Promise<{ success: boolean; error?: string }>;
+  login: (nim: string, nama: string) => Promise<boolean>;
   logout: () => void;
-  loading: boolean;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,57 +30,103 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is stored in localStorage
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    // Check if user is already logged in
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      const userData = JSON.parse(savedUser);
+      setUser(userData);
+      // Refresh user data from database
+      refreshUserData(userData.id);
     }
-    setLoading(false);
   }, []);
 
-  const login = async (nama: string, nim: string) => {
+  const refreshUserData = async (userId: string) => {
     try {
-      // First, try to find existing user
-      const { data: existingUser, error: findError } = await supabase
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        const updatedUser = {
+          id: data.id,
+          nama: data.nama,
+          nim: data.nim,
+          prodi: data.prodi,
+          semester: data.semester,
+          role: data.role
+        };
+        setUser(updatedUser);
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+    }
+  };
+
+  const refreshUser = async () => {
+    if (user?.id) {
+      await refreshUserData(user.id);
+    }
+  };
+
+  const login = async (nim: string, nama: string): Promise<boolean> => {
+    try {
+      // Check if user exists
+      const { data: existingUser, error: fetchError } = await supabase
         .from('users')
         .select('*')
         .eq('nim', nim)
+        .eq('nama', nama)
         .single();
 
-      if (findError && findError.code !== 'PGRST116') {
-        return { success: false, error: 'Terjadi kesalahan saat login' };
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        throw fetchError;
       }
 
-      let userData: User;
+      let userData;
 
       if (existingUser) {
-        // User exists, check if nama matches
-        if (existingUser.nama.toLowerCase() !== nama.toLowerCase()) {
-          return { success: false, error: 'Nama tidak sesuai dengan NIM yang terdaftar' };
-        }
+        // User exists, use existing data
         userData = existingUser;
       } else {
         // Create new user
-        const { data: newUser, error: createError } = await supabase
+        const { data: newUser, error: insertError } = await supabase
           .from('users')
-          .insert({ nama, nim })
+          .insert([
+            {
+              nim,
+              nama,
+              role: 'user'
+            }
+          ])
           .select()
           .single();
 
-        if (createError) {
-          return { success: false, error: 'Gagal membuat akun baru' };
-        }
+        if (insertError) throw insertError;
         userData = newUser;
       }
 
-      setUser(userData);
-      localStorage.setItem('currentUser', JSON.stringify(userData));
-      return { success: true };
+      const user = {
+        id: userData.id,
+        nama: userData.nama,
+        nim: userData.nim,
+        prodi: userData.prodi,
+        semester: userData.semester,
+        role: userData.role
+      };
+
+      setUser(user);
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      return true;
     } catch (error) {
-      return { success: false, error: 'Terjadi kesalahan yang tidak terduga' };
+      console.error('Login error:', error);
+      return false;
     }
   };
 
@@ -84,7 +136,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
