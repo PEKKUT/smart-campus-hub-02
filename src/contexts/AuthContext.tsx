@@ -11,9 +11,15 @@ interface User {
   role?: string;
 }
 
+interface LoginResult {
+  success: boolean;
+  error?: string;
+}
+
 interface AuthContextType {
   user: User | null;
-  login: (nim: string, nama: string) => Promise<boolean>;
+  loading: boolean;
+  login: (nim: string, nama: string) => Promise<LoginResult>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -30,6 +36,7 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -40,6 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Refresh user data from database
       refreshUserData(userData.id);
     }
+    setLoading(false);
   }, []);
 
   const refreshUserData = async (userId: string) => {
@@ -75,7 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const login = async (nim: string, nama: string): Promise<boolean> => {
+  const login = async (nim: string, nama: string): Promise<LoginResult> => {
     try {
       // Check if user exists
       const { data: existingUser, error: fetchError } = await supabase
@@ -123,10 +131,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setUser(user);
       localStorage.setItem('currentUser', JSON.stringify(user));
-      return true;
+      return { success: true };
     } catch (error) {
       console.error('Login error:', error);
-      return false;
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Login gagal' 
+      };
     }
   };
 
@@ -136,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
