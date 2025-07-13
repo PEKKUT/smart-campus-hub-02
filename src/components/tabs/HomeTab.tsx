@@ -93,65 +93,65 @@ const HomeTab = () => {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-          <p className="text-gray-600">Selamat datang, {user?.nama}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Dashboard</h1>
+          <p className="text-sm sm:text-base text-gray-600">Selamat datang, {user?.nama}</p>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total SKS</CardTitle>
-            <GraduationCap className="w-4 h-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">Total SKS</CardTitle>
+            <GraduationCap className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalSKS}</div>
+            <div className="text-lg sm:text-2xl font-bold">{stats.totalSKS}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">IPK</CardTitle>
-            <TrendingUp className="w-4 h-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">IPK</CardTitle>
+            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.ipk.toFixed(2)}</div>
+            <div className="text-lg sm:text-2xl font-bold">{stats.ipk.toFixed(2)}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Kehadiran</CardTitle>
-            <Calendar className="w-4 h-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">Kehadiran</CardTitle>
+            <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.kehadiran.toFixed(1)}%</div>
+            <div className="text-lg sm:text-2xl font-bold">{stats.kehadiran.toFixed(1)}%</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Mata Kuliah</CardTitle>
-            <BookOpen className="w-4 h-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">Mata Kuliah</CardTitle>
+            <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.mataKuliah}</div>
+            <div className="text-lg sm:text-2xl font-bold">{stats.mataKuliah}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Distribusi SKS per Semester</CardTitle>
+            <CardTitle className="text-sm sm:text-base">Distribusi SKS per Semester</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={250}>
               <BarChart data={chartData.sksPerSemester}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="semester" />
@@ -165,10 +165,10 @@ const HomeTab = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Tren IPK per Semester</CardTitle>
+            <CardTitle className="text-sm sm:text-base">Tren IPK per Semester</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={250}>
               <LineChart data={chartData.ipkTrend}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="semester" />
@@ -183,9 +183,9 @@ const HomeTab = () => {
 
       {stats.totalSKS === 0 && (
         <Card>
-          <CardContent className="text-center py-8">
-            <p className="text-gray-500">
-              Belum ada data. Mulai dengan menambahkan jadwal kuliah di menu Pengelola Kuliah.
+          <CardContent className="text-center py-6 sm:py-8">
+            <p className="text-sm sm:text-base text-gray-500">
+              Belum ada data. Mulai dengan menambahkan mata kuliah di menu Pengelola Kuliah.
             </p>
           </CardContent>
         </Card>

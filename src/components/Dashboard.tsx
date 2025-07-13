@@ -28,10 +28,12 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
       <div className="flex-1 overflow-auto">
-        {renderContent()}
+        <div className="min-h-full">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );
