@@ -34,7 +34,7 @@ const KuliahTab = () => {
 
   const fetchKuliahStats = async () => {
     try {
-      // Fetch jadwal kuliah - removed ordering by semester since the column doesn't exist
+      // Fetch jadwal kuliah
       const { data: jadwalData } = await supabase
         .from('jadwal_kuliah')
         .select('*')
@@ -76,7 +76,7 @@ const KuliahTab = () => {
         persentaseKehadiran
       });
 
-      // Prepare chart data - use semester from nilai table instead of jadwal_kuliah
+      // Prepare chart data
       const semesterMap = new Map();
       nilaiData?.forEach(item => {
         const semester = item.semester;
@@ -98,7 +98,6 @@ const KuliahTab = () => {
         nilai: item.nilai_akhir || 0
       })) || [];
 
-      // Generate more realistic kehadiran bulanan data
       const kehadiranBulanan = [
         { bulan: 'Jan', persentase: 85 },
         { bulan: 'Feb', persentase: 92 },
@@ -122,7 +121,7 @@ const KuliahTab = () => {
   const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 sm:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 sm:p-6 relative">
       <div className="mb-6 sm:mb-8">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -144,7 +143,7 @@ const KuliahTab = () => {
 
       {/* Enhanced Statistics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-        <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden group">
+        <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden group cursor-pointer">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-700">Total Mata Kuliah</CardTitle>
@@ -158,7 +157,7 @@ const KuliahTab = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden group">
+        <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden group cursor-pointer">
           <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-700">Total SKS</CardTitle>
@@ -172,7 +171,7 @@ const KuliahTab = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden group">
+        <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden group cursor-pointer">
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-700">Rata-rata Nilai</CardTitle>
@@ -186,7 +185,7 @@ const KuliahTab = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden group">
+        <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden group cursor-pointer">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-700">Kehadiran</CardTitle>
@@ -304,37 +303,37 @@ const KuliahTab = () => {
       )}
 
       {/* Enhanced Tabs */}
-      <Card className="bg-white shadow-lg border-0">
+      <Card className="bg-white shadow-lg border-0 relative z-10">
         <CardContent className="p-6">
           <Tabs defaultValue="pengambilan" className="space-y-6">
             <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 bg-gray-100 p-1 rounded-xl">
               <TabsTrigger 
                 value="pengambilan" 
-                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all"
+                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all cursor-pointer"
               >
                 Pengambilan MK
               </TabsTrigger>
               <TabsTrigger 
                 value="jadwal" 
-                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all"
+                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all cursor-pointer"
               >
                 Jadwal
               </TabsTrigger>
               <TabsTrigger 
                 value="kehadiran" 
-                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all"
+                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all cursor-pointer"
               >
                 Kehadiran
               </TabsTrigger>
               <TabsTrigger 
                 value="sks" 
-                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all"
+                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all cursor-pointer"
               >
                 SKS
               </TabsTrigger>
               <TabsTrigger 
                 value="nilai" 
-                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all"
+                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all cursor-pointer"
               >
                 Nilai
               </TabsTrigger>
