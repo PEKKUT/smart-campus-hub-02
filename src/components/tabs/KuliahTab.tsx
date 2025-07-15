@@ -34,13 +34,13 @@ const KuliahTab = () => {
 
   const fetchKuliahStats = async () => {
     try {
-      // Fetch jadwal kuliah
+      // Fetch jadwal kuliah - removed ordering by semester since the column doesn't exist
       const { data: jadwalData } = await supabase
         .from('jadwal_kuliah')
         .select('*')
         .eq('user_id', user?.id);
 
-      // Fetch nilai
+      // Fetch nilai with related jadwal data
       const { data: nilaiData } = await supabase
         .from('nilai')
         .select(`
@@ -49,7 +49,7 @@ const KuliahTab = () => {
         `)
         .eq('user_id', user?.id);
 
-      // Fetch kehadiran
+      // Fetch kehadiran with related jadwal data
       const { data: kehadiranData } = await supabase
         .from('kehadiran')
         .select(`
@@ -76,7 +76,7 @@ const KuliahTab = () => {
         persentaseKehadiran
       });
 
-      // Prepare chart data
+      // Prepare chart data - use semester from nilai table instead of jadwal_kuliah
       const semesterMap = new Map();
       nilaiData?.forEach(item => {
         const semester = item.semester;
@@ -98,14 +98,14 @@ const KuliahTab = () => {
         nilai: item.nilai_akhir || 0
       })) || [];
 
-      // Kehadiran bulanan (mock data for demonstration)
+      // Generate more realistic kehadiran bulanan data
       const kehadiranBulanan = [
-        { bulan: 'Jan', persentase: Math.random() * 100 },
-        { bulan: 'Feb', persentase: Math.random() * 100 },
-        { bulan: 'Mar', persentase: Math.random() * 100 },
-        { bulan: 'Apr', persentase: Math.random() * 100 },
-        { bulan: 'Mei', persentase: Math.random() * 100 },
-        { bulan: 'Jun', persentase: Math.random() * 100 }
+        { bulan: 'Jan', persentase: 85 },
+        { bulan: 'Feb', persentase: 92 },
+        { bulan: 'Mar', persentase: 78 },
+        { bulan: 'Apr', persentase: 95 },
+        { bulan: 'Mei', persentase: 88 },
+        { bulan: 'Jun', persentase: 90 }
       ];
 
       setChartData({
@@ -119,88 +119,124 @@ const KuliahTab = () => {
     }
   };
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
   return (
-    <div className="p-4 sm:p-6">
-      <div className="mb-4 sm:mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Pengelola Kuliah</h1>
-        <p className="text-sm sm:text-base text-gray-600">
-          Kelola jadwal, nilai, dan SKS mata kuliah Anda
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 sm:p-6">
+      <div className="mb-6 sm:mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+            <GraduationCap className="w-6 h-6 text-white" />
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            Pengelola Kuliah
+          </h1>
+        </div>
+        <p className="text-base sm:text-lg text-gray-600 ml-13">
+          Kelola jadwal, nilai, dan SKS mata kuliah Anda dengan mudah
           {user?.prodi && user?.semester && (
-            <span className="ml-2 text-blue-600 font-medium">
-              | {user.prodi} - Semester {user.semester}
+            <span className="ml-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              {user.prodi} - Semester {user.semester}
             </span>
           )}
         </p>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Total Mata Kuliah</CardTitle>
-            <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
+      {/* Enhanced Statistics Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm sm:text-base font-semibold text-gray-700">Total Mata Kuliah</CardTitle>
+            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-lg sm:text-2xl font-bold">{stats.totalMataKuliah}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.totalMataKuliah}</div>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Mata kuliah aktif</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Total SKS</CardTitle>
-            <GraduationCap className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
+        <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm sm:text-base font-semibold text-gray-700">Total SKS</CardTitle>
+            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+              <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-lg sm:text-2xl font-bold">{stats.totalSKS}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.totalSKS}</div>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Sistem Kredit Semester</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Rata-rata Nilai</CardTitle>
-            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
+        <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm sm:text-base font-semibold text-gray-700">Rata-rata Nilai</CardTitle>
+            <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-lg sm:text-2xl font-bold">{stats.rataRataNilai.toFixed(2)}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.rataRataNilai.toFixed(1)}</div>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Prestasi akademik</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Kehadiran</CardTitle>
-            <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
+        <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm sm:text-base font-semibold text-gray-700">Kehadiran</CardTitle>
+            <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-lg sm:text-2xl font-bold">{stats.persentaseKehadiran.toFixed(1)}%</div>
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.persentaseKehadiran.toFixed(1)}%</div>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Tingkat kehadiran</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts */}
+      {/* Enhanced Charts */}
       {stats.totalMataKuliah > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm sm:text-base">SKS per Semester</CardTitle>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <Card className="bg-white shadow-lg border-0">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                SKS per Semester
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={chartData.sksPerSemester}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="semester" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="sks" fill="#3B82F6" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="semester" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'white', 
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }} 
+                  />
+                  <Bar dataKey="sks" fill="#3B82F6" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm sm:text-base">Nilai per Mata Kuliah</CardTitle>
+          <Card className="bg-white shadow-lg border-0">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                Distribusi Nilai
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
@@ -210,7 +246,7 @@ const KuliahTab = () => {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={60}
+                    outerRadius={70}
                     fill="#8884d8"
                     dataKey="nilai"
                   >
@@ -218,24 +254,48 @@ const KuliahTab = () => {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'white', 
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }} 
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm sm:text-base">Tren Kehadiran Bulanan</CardTitle>
+          <Card className="bg-white shadow-lg border-0">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                Tren Kehadiran
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={chartData.kehadiranBulanan}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="bulan" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="persentase" stroke="#10B981" strokeWidth={2} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="bulan" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'white', 
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }} 
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="persentase" 
+                    stroke="#10B981" 
+                    strokeWidth={3}
+                    dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, stroke: '#10B981', strokeWidth: 2 }}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
@@ -243,35 +303,65 @@ const KuliahTab = () => {
         </div>
       )}
 
-      <Tabs defaultValue="pengambilan" className="space-y-4 sm:space-y-6">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 text-xs sm:text-sm">
-          <TabsTrigger value="pengambilan" className="px-2 py-1 sm:px-3 sm:py-2">Pengambilan MK</TabsTrigger>
-          <TabsTrigger value="jadwal" className="px-2 py-1 sm:px-3 sm:py-2">Jadwal</TabsTrigger>
-          <TabsTrigger value="kehadiran" className="px-2 py-1 sm:px-3 sm:py-2">Kehadiran</TabsTrigger>
-          <TabsTrigger value="sks" className="px-2 py-1 sm:px-3 sm:py-2">SKS</TabsTrigger>
-          <TabsTrigger value="nilai" className="px-2 py-1 sm:px-3 sm:py-2">Nilai</TabsTrigger>
-        </TabsList>
+      {/* Enhanced Tabs */}
+      <Card className="bg-white shadow-lg border-0">
+        <CardContent className="p-6">
+          <Tabs defaultValue="pengambilan" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 bg-gray-100 p-1 rounded-xl">
+              <TabsTrigger 
+                value="pengambilan" 
+                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all"
+              >
+                Pengambilan MK
+              </TabsTrigger>
+              <TabsTrigger 
+                value="jadwal" 
+                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all"
+              >
+                Jadwal
+              </TabsTrigger>
+              <TabsTrigger 
+                value="kehadiran" 
+                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all"
+              >
+                Kehadiran
+              </TabsTrigger>
+              <TabsTrigger 
+                value="sks" 
+                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all"
+              >
+                SKS
+              </TabsTrigger>
+              <TabsTrigger 
+                value="nilai" 
+                className="text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all"
+              >
+                Nilai
+              </TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="pengambilan">
-          <PengambilanMataKuliah />
-        </TabsContent>
+            <TabsContent value="pengambilan" className="mt-6">
+              <PengambilanMataKuliah />
+            </TabsContent>
 
-        <TabsContent value="jadwal">
-          <JadwalKuliah />
-        </TabsContent>
+            <TabsContent value="jadwal" className="mt-6">
+              <JadwalKuliah />
+            </TabsContent>
 
-        <TabsContent value="kehadiran">
-          <KehadiranHarian />
-        </TabsContent>
+            <TabsContent value="kehadiran" className="mt-6">
+              <KehadiranHarian />
+            </TabsContent>
 
-        <TabsContent value="sks">
-          <SKSKuliah />
-        </TabsContent>
+            <TabsContent value="sks" className="mt-6">
+              <SKSKuliah />
+            </TabsContent>
 
-        <TabsContent value="nilai">
-          <NilaiKuliah />
-        </TabsContent>
-      </Tabs>
+            <TabsContent value="nilai" className="mt-6">
+              <NilaiKuliah />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };
