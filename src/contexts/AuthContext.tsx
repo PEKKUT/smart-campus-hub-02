@@ -85,12 +85,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (nim: string, nama: string): Promise<LoginResult> => {
     try {
-      // Check if user exists
+      // Check if user exists by NIM first
       const { data: existingUser, error: fetchError } = await supabase
         .from('users')
         .select('*')
         .eq('nim', nim)
-        .eq('nama', nama)
         .single();
 
       if (fetchError && fetchError.code !== 'PGRST116') {
@@ -100,8 +99,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let userData;
 
       if (existingUser) {
-        // User exists, use existing data
-        userData = existingUser;
+        // User exists, check if nama matches or update it
+        if (existingUser.nama !== nama) {
+          // Update the nama for this NIM
+          const { data: updatedUser, error: updateError } = await supabase
+            .from('users')
+            .update({ nama })
+            .eq('nim', nim)
+            .select()
+            .single();
+
+          if (updateError) throw updateError;
+          userData = updatedUser;
+        } else {
+          userData = existingUser;
+        }
       } else {
         // Create new user
         const { data: newUser, error: insertError } = await supabase
